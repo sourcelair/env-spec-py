@@ -1,4 +1,12 @@
+spec_str = 'DATABASE_URL\nADMIN_EMAIL\nDEBUG'
 field_array = []
+
+#split input string by \n 
+def str_split(spec_str):
+    global field_array
+
+    field_array = spec_str.split('\n')
+
 
 #perilambanei kai _ kai arithmous
 #function that checks if input_str consists of latin chars
@@ -10,16 +18,15 @@ def check_latin_chars(input_str):
     else:
         return 0
 
-#def numeric_digit(input_str):
-
+#checks every char of input_str
+def check_syntax(input_str):
+    for i in input_str:
+        if(i.isdigit() == False or i != '_' or (i <= 'A' and i>= 'Z')):
+            return -1  
+        
+    return 0
 
 def check_input(file_object):
-    for line in file_object:    #save lines at field_array
-        print('in here: ', line)
-        
-        line = line.replace('\n','')       #remove \n char
-        field_array.append(line)
-
     for line in field_array:        #check syntax  if syntax error ret = -1 else ret = 0
         latin_chars = check_latin_chars(line)
         
@@ -32,26 +39,12 @@ def check_input(file_object):
             return -1
         
         #syntax check for existing digits / underscore on string
+        ret = check_syntax(line)
 
-       
+        if (ret == -1):
+            print('SYNTAX ERROR!')
+            return -1
 
-        
-        
-
-        
-        
-       
-        
-
-        
-      
-
-
-
-
-
-env_filename = input('Give the env.spec file... ')     
-file_object = open(env_filename, 'r')
-
-check_input(file_object)
+str_split(spec_str)
+#check_input(file_object)
 print(field_array)
