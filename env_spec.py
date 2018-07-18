@@ -63,28 +63,28 @@ def check_input(field_array):
     return 0
 
 
-def create_output(input_array):
-    """
-    create html string from input_array
-    """
+def render_env_var_spec(env_var_name):
     ret_str = ''
+    env_var_name_lower = env_var_name.lower()
 
-    ret_str = '<label for="env_spec_database_url">' + input_array[0] + '</label>'
-    ret_str += '<input id="env_spec_database_url" name="database_url" />'
-    ret_str += '<label for="env_spec_admin_email">' + input_array[1] + '</label>'
-    ret_str += '<input id="env_spec_admin_email" name="admin_email" />'
-    ret_str += '<label for="env_spec_debug">' + input_array[2] + '</label>'
-    ret_str += '<input id="env_spec_debug" name="debug" />'
+
+    ret_str = '<label for="env_spec_'+ env_var_name_lower +'">' + env_var_name + '</label>'
+    ret_str += '<input id="env_spec_' + env_var_name_lower + '" name="' + env_var_name_lower + '" />'
 
     return ret_str
 
-"""
-main code
-"""
-field_array = str_split(spec_str)
-ret = check_input(field_array)
 
-if (ret == 0):
-    html_str = create_output(field_array)
-    print(html_str)
+def main():
+    field_array = str_split(spec_str)
+    ret = check_input(field_array)
 
+    if (ret == 0):
+        html_output = []
+        for field in field_array:  
+            html_output.append(render_env_var_spec(field))
+
+        html_output = '\n'.join(html_output)
+        print(html_output)
+
+if __name__ == "__main__":
+    main()
