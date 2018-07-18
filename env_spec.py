@@ -1,90 +1,87 @@
-spec_str = 'DATABASE_URL\nADMIN_EMAIL\nDEBUG'
-
-
-def str_split(spec_str):
-    """
-    split input string by \n and returns strings into an array
-    """
-    field_array = []
-    field_array = spec_str.split('\n')
-    
-    return field_array
+import re
 
 def check_latin_chars(input_str):
     """
     function that checks if input_str consists of latin chars 
     (input_str can contain underscore and numeric digits)
     """
-
     try:
         input_str.encode('utf-8').decode('ascii')
     except Exception:
-        return -1
+        return False
     else:
-        return 0
+        return True
 
 
 def check_symbols(input_str):
     """
-    checks every char of input_str (must be digit/underscore/uppercase latin char)
-    return -1 for error about specifications or 0 if correct
+    checks input_str (must be digit/underscore/uppercase latin char)
+    return False for error about specifications or True if correct
     """
+    alphanumeric_that_does_not_start_with_digit = r'^[A-Z_][0-9A-Z_]*$'
 
-    for i in input_str:   
-        #given specifications
-        if(i.isdigit() == True or i == '_' or (i >= 'A' and i <= 'Z')):
-            continue
-        else:
-            return -1
-        
-    return 0
+    ret = re.match(alphanumeric_that_does_not_start_with_digit, input_str)
+
+    if ret == None:
+        return False
+    else:
+        return True
 
 
 def check_input(field_array):
-    for line in field_array:        #check syntax  if syntax error ret = -1 else ret = 0
+    """
+    Checks syntax of input(uppercase latin chrars,numeric digits, underscores).
+    Returns False for error or True for correct syntax.
+    """
+    for line in field_array:       
         
         latin_chars = check_latin_chars(line)
-        if((line.isupper() == False) and (latin_chars == -1)):
-            print('1.SYNTAX ERROR: NOT UPPER OR LATIN CHAR!')
-            return -1
-        
-        if(line[0].isdigit()):
-            print('2.SYNTAX ERROR:STARTS WITH NUMBER!')
-            return -1
+        if(latin_chars == -1):
+            print('1.SYNTAX ERROR: NOT LATIN CHARS!')
+            return False
         
         #syntax check for existing digits / underscore on string
         ret = check_symbols(line)
-
-        if (ret == -1):
-            print('3.SYNTAX ERROR:WRONG SYMBOLS!')
-            return -1
+        if (ret == False):
+            print('2.SYNTAX ERROR:WRONG SYMBOLS!')
+            return False
     
     print('---Correct syntax of given specificarions---')
-    return 0
+    return True
 
 
 def render_env_var_spec(env_var_name):
     ret_str = ''
     env_var_name_lower = env_var_name.lower()
 
-
-    ret_str = '<label for="env_spec_'+ env_var_name_lower +'">' + env_var_name + '</label>'
-    ret_str += '<input id="env_spec_' + env_var_name_lower + '" name="' + env_var_name_lower + '" />'
+    ret_str = f'<label for="env_spec_{env_var_name_lower}"> {env_var_name}</label>'
+    ret_str += '\n'
+    ret_str += f'<input id="env_spec_{env_var_name_lower}" name="{env_var_name_lower}" />'
 
     return ret_str
 
+def render_env_spec_to_html(field_array):
+    html_output = []
+    ret = check_input(field_array)  #check syntax
 
-def main():
-    field_array = str_split(spec_str)
-    ret = check_input(field_array)
-
-    if (ret == 0):
-        html_output = []
+    if (ret == True):
         for field in field_array:  
-            html_output.append(render_env_var_spec(field))
+            html_output.append(render_env_var_spec(field))  #create html output
 
         html_output = '\n'.join(html_output)
-        print(html_output)
+   
+    return html_output
+
+
+def main():
+    field_array = []
+    field_array = spec_str.split('\n')
+   
+    html_output = render_env_spec_to_html(field_array)
+
+    return html_output
 
 if __name__ == "__main__":
-    main()
+    spec_str = 'DATABASE_URL\nADMIN_EMAIL\nDEBUG'
+
+    print(main())
