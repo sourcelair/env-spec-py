@@ -25,3 +25,5 @@ MANIFEST
 
 # Environments
 .env
+
+.pytest_cache
