@@ -12,7 +12,7 @@ def check_input(field_array):
         ret = re.match(alphanumeric_that_does_not_start_with_digit, line)
 
         if ret is None:
-            print("SYNTAX ERROR:WRONG SYMBOLS!")
+            # print("SYNTAX ERROR:WRONG SYMBOLS!")
             return False
 
     return True
