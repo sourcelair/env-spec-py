@@ -3,6 +3,8 @@ python:
   - "3.7"
 install: 
   - pip install pipenv 
-  - pipenv --system install
+  - pipenv install --system --dev
 script:
   - pytest   
+notifications:
+  email: False
