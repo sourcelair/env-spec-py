@@ -6,7 +6,7 @@ setup(
     description=(
         "Fast, straightforward, validated environment configuration."
     ),
-    py_modules=["sec"],
+    py_modules=["env_spec"],
     url="https://github.com/sourcelair/env-spec-py",
     author="SourceLair, Private Company",
     author_email="support@sourcelair.com",
