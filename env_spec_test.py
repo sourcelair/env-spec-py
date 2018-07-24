@@ -14,8 +14,14 @@ def test_non_existed_type():
 
 
 def test_valid_input():
-    assert env_spec.render_env_spec_to_html("DATABASE_URL: url") == (
-        '<label for="env_spec_database_url"> DATABASE_URL</label>\n'
-        '<input id="env_spec_database_url" name="database_url" />\n'
-        '<input id="env_spec_database_url" name="database_url" type="url" />'
+    assert env_spec.render_env_spec_to_html(
+        "ADMIN_EMAIL: email\nDEBUG: number\nADMIN_NAME"
+    ) == (
+        '<label for="env_spec_admin_email"> ADMIN_EMAIL</label>\n'
+        '<input id="env_spec_admin_email" name="admin_email" />\n'
+        '<input id="env_spec_admin_email" name="admin_email" type="email" />\n'
+        '<label for="env_spec_debug"> DEBUG</label>\n'
+        '<input id="env_spec_debug" name="debug" />\n'
+        '<input id="env_spec_debug" name="debug" type="number" />\n'
+        '<label for="env_spec_admin_name"> ADMIN_NAME</label>\n'
     )

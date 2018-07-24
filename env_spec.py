@@ -40,14 +40,13 @@ def check_type(input_type):
     return True
 
 
-def render_env_var_spec(env_var):
+def render_env_var_spec(env_var_field, env_var_type):
     """
-    Creates html sting from env_variable (field, type). Returns the string.
+    Creates html string from env_variables (field, type). Returns the string.
     """
-    try:
-        env_var_field, env_var_type = env_var.split(": ")
-        env_var_field_lower = env_var_field.lower()
+    env_var_field_lower = env_var_field.lower()
 
+    if env_var_type != "":
         ret_str = (
             f'<label for="env_spec_{env_var_field_lower}"> {env_var_field}</label>'
         )
@@ -55,10 +54,7 @@ def render_env_var_spec(env_var):
         ret_str += f'<input id="env_spec_{env_var_field_lower}" name="{env_var_field_lower}" />'
         ret_str += "\n"
         ret_str += f'<input id="env_spec_{env_var_field_lower}" name="{env_var_field_lower}" type="{env_var_type}" />'
-    except:
-        env_var_field = env_var
-        env_var_field_lower = env_var_field.lower()
-
+    else:
         ret_str = (
             f'<label for="env_spec_{env_var_field_lower}"> {env_var_field}</label>'
         )
@@ -66,32 +62,44 @@ def render_env_var_spec(env_var):
     return ret_str
 
 
-def render_env_spec_to_html(input_line):
-    try:
-        input_field, input_type = input_line.split(": ")
+def render_env_spec_to_html(input_str):
+    """
+    Takes the whole string and splits it first by \n and then by :, if possible. Returns html output or "".
+    """
+    html_output = ""
+    last_string_flag = False
 
-        if check_input(input_field) and check_type(input_type):
-            html_output = render_env_var_spec(input_line)
+    while 1:
+        try:
+            str, rest_str = input_str.split("\n", 1)
+            input_str = rest_str
 
+        except:
+            str = input_str
+            last_string_flag = True
+        try:
+            input_field, input_type = str.split(": ")
+
+            if check_input(input_field) and check_type(input_type):
+                html_output += render_env_var_spec(input_field, input_type)
+                html_output += "\n"
+            else:
+                return ""
+        except:
+            input_field = str
+
+            if check_input(input_field):
+                html_output += render_env_var_spec(input_field, "")
+                html_output += "\n"
+            else:
+                return ""
+
+        if last_string_flag == True:
             return html_output
-    except:
-        input_field = input_line
-
-        if check_input(input_field):
-            html_output = render_env_var_spec(input_field)
-
-            return html_output
-    return ""
 
 
 def main():
-    field_list = spec_str.split("\n")
-    html_output = ""
-
-    for line in field_list:
-        html_output += render_env_spec_to_html(line)
-        html_output += "\n"
-
+    html_output = render_env_spec_to_html(spec_str)
     return html_output
 
 
