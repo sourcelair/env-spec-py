@@ -17,11 +17,10 @@ def test_valid_input():
     assert env_spec.render_env_spec_to_html(
         "ADMIN_EMAIL: email\nDEBUG: number\nADMIN_NAME"
     ) == (
-        '<label for="env_spec_admin_email"> ADMIN_EMAIL</label>\n'
-        '<input id="env_spec_admin_email" name="admin_email" />\n'
+        '<label for="env_spec_admin_email">ADMIN_EMAIL</label>\n'
         '<input id="env_spec_admin_email" name="admin_email" type="email" />\n'
-        '<label for="env_spec_debug"> DEBUG</label>\n'
-        '<input id="env_spec_debug" name="debug" />\n'
+        '<label for="env_spec_debug">DEBUG</label>\n'
         '<input id="env_spec_debug" name="debug" type="number" />\n'
-        '<label for="env_spec_admin_name"> ADMIN_NAME</label>\n'
+        '<label for="env_spec_admin_name">ADMIN_NAME</label>\n'
+        '<input id="env_spec_admin_name" name="admin_name" />\n'
     )

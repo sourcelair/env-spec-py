@@ -48,15 +48,15 @@ def render_env_var_spec(env_var_field, env_var_type):
 
     if env_var_type != "":
         ret_str = (
-            f'<label for="env_spec_{env_var_field_lower}"> {env_var_field}</label>'
+            f'<label for="env_spec_{env_var_field_lower}">{env_var_field}</label>'
+            f"\n"
+            f'<input id="env_spec_{env_var_field_lower}" name="{env_var_field_lower}" type="{env_var_type}" />'
         )
-        ret_str += "\n"
-        ret_str += f'<input id="env_spec_{env_var_field_lower}" name="{env_var_field_lower}" />'
-        ret_str += "\n"
-        ret_str += f'<input id="env_spec_{env_var_field_lower}" name="{env_var_field_lower}" type="{env_var_type}" />'
     else:
         ret_str = (
-            f'<label for="env_spec_{env_var_field_lower}"> {env_var_field}</label>'
+            f'<label for="env_spec_{env_var_field_lower}">{env_var_field}</label>'
+            f"\n"
+            f'<input id="env_spec_{env_var_field_lower}" name="{env_var_field_lower}" />'
         )
 
     return ret_str
@@ -69,16 +69,11 @@ def render_env_spec_to_html(input_str):
     html_output = ""
     last_string_flag = False
 
-    while 1:
-        try:
-            str, rest_str = input_str.split("\n", 1)
-            input_str = rest_str
+    lines = input_str.split("\n")
 
-        except:
-            str = input_str
-            last_string_flag = True
+    for line in lines:
         try:
-            input_field, input_type = str.split(": ")
+            input_field, input_type = line.split(": ")
 
             if check_input(input_field) and check_type(input_type):
                 html_output += render_env_var_spec(input_field, input_type)
@@ -86,7 +81,7 @@ def render_env_spec_to_html(input_str):
             else:
                 return ""
         except:
-            input_field = str
+            input_field = line
 
             if check_input(input_field):
                 html_output += render_env_var_spec(input_field, "")
@@ -94,8 +89,7 @@ def render_env_spec_to_html(input_str):
             else:
                 return ""
 
-        if last_string_flag == True:
-            return html_output
+    return html_output
 
 
 def main():
