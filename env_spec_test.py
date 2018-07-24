@@ -22,5 +22,5 @@ def test_valid_input():
         '<label for="env_spec_debug">DEBUG</label>\n'
         '<input id="env_spec_debug" name="debug" type="number" />\n'
         '<label for="env_spec_admin_name">ADMIN_NAME</label>\n'
-        '<input id="env_spec_admin_name" name="admin_name" />\n'
+        '<input id="env_spec_admin_name" name="admin_name" type="text" />\n'
     )

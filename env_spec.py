@@ -45,19 +45,13 @@ def render_env_var_spec(env_var_field, env_var_type):
     Creates html string from env_variables (field, type). Returns the string.
     """
     env_var_field_lower = env_var_field.lower()
+    env_var_type = env_var_type or "text"
 
-    if env_var_type != "":
-        ret_str = (
-            f'<label for="env_spec_{env_var_field_lower}">{env_var_field}</label>'
-            f"\n"
-            f'<input id="env_spec_{env_var_field_lower}" name="{env_var_field_lower}" type="{env_var_type}" />'
-        )
-    else:
-        ret_str = (
-            f'<label for="env_spec_{env_var_field_lower}">{env_var_field}</label>'
-            f"\n"
-            f'<input id="env_spec_{env_var_field_lower}" name="{env_var_field_lower}" />'
-        )
+    ret_str = (
+        f'<label for="env_spec_{env_var_field_lower}">{env_var_field}</label>'
+        f"\n"
+        f'<input id="env_spec_{env_var_field_lower}" name="{env_var_field_lower}" type="{env_var_type}" />'
+    )
 
     return ret_str
 
