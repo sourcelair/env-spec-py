@@ -3,9 +3,7 @@ from setuptools import setup
 setup(
     name="env-spec",
     version="0.1.0",
-    description=(
-        "Fast, straightforward, validated environment configuration."
-    ),
+    description=("Fast, straightforward, validated environment configuration."),
     py_modules=["env_spec"],
     url="https://github.com/sourcelair/env-spec-py",
     author="SourceLair, Private Company",

@@ -48,8 +48,7 @@ def render_env_var_spec(env_var_field, env_var_type):
     env_var_type = env_var_type or "text"
 
     ret_str = (
-        f'<label for="env_spec_{env_var_field_lower}">{env_var_field}</label>'
-        f"\n"
+        f'<label for="env_spec_{env_var_field_lower}">{env_var_field}</label>\n'
         f'<input id="env_spec_{env_var_field_lower}" name="{env_var_field_lower}" type="{env_var_type}" />'
     )
 
