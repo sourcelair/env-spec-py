@@ -1,5 +1,4 @@
 import re
-import json
 
 valid_types_list = [
     "color",
