@@ -85,11 +85,11 @@ def render_env_spec_to_html(input_str):
     return html_output
 
 
-def main():
-    html_output = render_env_spec_to_html(spec_str)
-    return html_output
+# def main():
+#    html_output = render_env_spec_to_html(spec_str)
+#    return html_output
 
 
-if __name__ == "__main__":
-    spec_str = "DATABASE_URL: url\nADMIN_EMAIL: email\nDEBUG: number\nADMIN_NAME"
-    print(main())
+# if __name__ == "__main__":
+#   spec_str = "DATABASE_URL: url\nADMIN_EMAIL: email\nDEBUG: number\nADMIN_NAME"
+#    print(main())

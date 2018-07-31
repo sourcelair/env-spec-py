@@ -3,20 +3,20 @@
     <body>
         <h2>Textarea for user's input.</h2>
         <p>Type input in env.spec format.</p>
-        <textarea env_spec_input="new_textarea"></textarea>
+        <textarea env-spec-input="new_textarea"></textarea>
 
         <button type="button">Render</button>
 
         <script>
             document.getElementById("button").addEventListener("click", requestRenderedEnvSpec);
             function requestRenderedEnvSpec() {
-                var x = document.getElementById("myTextarea").value;
+                var env_spec_input = document.getElementById("myTextarea").value;
 
                 const myRequest = new Request('/api/render/', {method: '[POST]'});
 
                 fetch(myRequest).then(function(response) {
                     response.text().then(function(text) {
-                        poemDisplay.textContent = text;
+                        env_spec_input.textContent = text;
                     });
                 });
             }
