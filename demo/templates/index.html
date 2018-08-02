@@ -3,22 +3,20 @@
     <body>
         <h2>Textarea for user's input.</h2>
         <p>Type input in env.spec format.</p>
-        <textarea env-spec-input="new_textarea"></textarea>
+        <textarea id="new_textarea"></textarea>
 
-        <button type="button">Render</button>
-
+        <button id="button">Render</button>
+        <p id="demo"></p>   
         <script>
             document.getElementById("button").addEventListener("click", requestRenderedEnvSpec);
+            
             function requestRenderedEnvSpec() {
-                var env_spec_input = document.getElementById("myTextarea").value;
+                var env_spec_input = document.getElementById("new_textarea").value;
+                document.getElementById("demo").innerHTML = env_spec_input;
+                
+                const myRequest = new Request('/api/render/', {method: 'POST', body: env_spec_input});
 
-                const myRequest = new Request('/api/render/', {method: '[POST]'});
-
-                fetch(myRequest).then(function(response) {
-                    response.text().then(function(text) {
-                        env_spec_input.textContent = text;
-                    });
-                });
+                fetch(myRequest).then((response) =>  console.log('Success:', response.formData));
             }
         </script>
     </body>

@@ -60,9 +60,7 @@ def render_env_spec_to_html(input_str):
     Takes the whole string and splits it first by \n and then by :, if possible. Returns html output or "".
     """
     html_output = ""
-    last_string_flag = False
-
-    lines = input_str.split("\n")
+    lines = input_str.split("\\n")
 
     for line in lines:
         try:
