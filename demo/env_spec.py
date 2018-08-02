@@ -93,7 +93,7 @@ def render_env_spec_to_html(input_str):
     """
     html_output = ""
 
-    lines = input_str.split("\\n")
+    lines = input_str.split("\n")
 
     for line in lines:
         try:
@@ -114,11 +114,11 @@ def render_env_spec_to_html(input_str):
     return html_output
 
 
-# def main():
-#    html_output = render_env_spec_to_html(spec_str)
-#    return html_output
+def main():
+    html_output = render_env_spec_to_html(spec_str)
+    return html_output
 
 
-# if __name__ == "__main__":
-#    spec_str = "DEBUG: [0,1]\nENVIRONMENT: [production,staging,development]"
-#    print(main())
+if __name__ == "__main__":
+    spec_str = "DEBUG: [0,1]\nENVIRONMENT: [production,staging,development]"
+    print(main())
