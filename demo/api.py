@@ -1,4 +1,5 @@
-from flask import Flask, request
+from flask import Flask
+from flask import request
 from flask import render_template
 import env_spec
 
@@ -15,6 +16,7 @@ def input_envspec():
 def render_envspec():
     data = request.data
     data = data.decode("utf-8")
+
     html_output = env_spec.render_env_spec_to_html(data)
 
     print("hmtl ouput:", html_output)
