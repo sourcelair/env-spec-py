@@ -19,6 +19,4 @@ def render_envspec():
 
     html_output = env_spec.render_env_spec_to_html(data)
 
-    print("hmtl ouput:", html_output)
-
     return html_output
