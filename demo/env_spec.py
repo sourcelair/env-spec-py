@@ -47,8 +47,17 @@ def check_input(input_field):
 
 def check_type(input_type):
     """
-    Checks if given type is valid and returns True, else returs False
+    Checks if given type is valid and returns True, else returns False.
     """
+    if "[" in input_type and "=" in input_type:
+        env_var_type, value = input_type.split("=")
+        value = value.strip()
+
+        if value in env_var_type:
+            return True
+        else:
+            return False
+
     if "[" in input_type:
         return True
     elif input_type not in valid_types_list:
@@ -66,23 +75,43 @@ def render_env_var_spec(env_var_field, env_var_type):
     env_var_type = env_var_type or "text"
 
     if "[" not in env_var_type:
-        ret_str = (
-            f'<label for="env_spec_{env_var_field_lower}">{env_var_field}</label>\n'
-            f'<input id="env_spec_{env_var_field_lower}" name="{env_var_field_lower}" type="{env_var_type}" />\n'
-        )
+        if "=" in env_var_type:
+            env_var_type, value = env_var_type.split("=")
+            value = value.strip()
+
+            ret_str = (
+                f'<label for="env_spec_{env_var_field_lower}">{env_var_field}</label>\n'
+                f'<input id="env_spec_{env_var_field_lower}" name="{env_var_field_lower}" type="{env_var_type}" value="{value}" />\n'
+            )
+        else:
+            ret_str = (
+                f'<label for="env_spec_{env_var_field_lower}">{env_var_field}</label>\n'
+                f'<input id="env_spec_{env_var_field_lower}" name="{env_var_field_lower}" type="{env_var_type}" />\n'
+            )
     else:
         ret_str = ""
 
-        env_var_type_list = create_list(env_var_type)
+        if "=" in env_var_type:
+            env_var_type, value = env_var_type.split("=")
+            value = value.strip()
 
-        ret_str += (
-            f'<label for="env_spec_{env_var_field_lower}">{env_var_field}</label>\n'
-            f'<select id="env_spec_{env_var_field_lower}" name="{env_var_field_lower}">\n'
-        )
-        for line in env_var_type_list:
-            ret_str += f'\t<option value="{line}">{line}</option>\n'
+            ret_str += (
+                f'<label for="env_spec_{env_var_field_lower}">{env_var_field}</label>\n'
+                f'<select id="env_spec_{env_var_field_lower}" name="{env_var_field_lower}">\n'
+                f'\t<option value="{value}">{value}</option>\n'
+                f"</select>\n"
+            )
+        else:
+            env_var_type_list = create_list(env_var_type)
 
-        ret_str += "</select>\n"
+            ret_str += (
+                f'<label for="env_spec_{env_var_field_lower}">{env_var_field}</label>\n'
+                f'<select id="env_spec_{env_var_field_lower}" name="{env_var_field_lower}">\n'
+            )
+            for line in env_var_type_list:
+                ret_str += f'\t<option value="{line}">{line}</option>\n'
+
+            ret_str += "</select>\n"
 
     return ret_str
 
@@ -120,5 +149,5 @@ def main():
 
 
 if __name__ == "__main__":
-    spec_str = "DEBUG: [0,1]\nENVIRONMENT: [production,staging,development]"
+    spec_str = "DEBUG: [0,1]=1\nENVIRONMENT: [production,staging,development]=develoent"
     print(main())
