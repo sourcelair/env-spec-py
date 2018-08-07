@@ -1,0 +1,31 @@
+<!DOCTYPE>
+<html>
+    <body>
+        <h2>Textarea for user's input.</h2>
+        <p>Type input in env.spec format.</p>
+        
+        <textarea id="new_textarea"></textarea>
+        <button id="button">Render</button>      
+        <pre id='pre_element'></pre>
+        <div id='div_element'></div>
+        
+        <script>
+            var response_text;
+            document.getElementById("button").addEventListener("click", requestRenderedEnvSpec);
+            
+            function requestRenderedEnvSpec() {
+                var html_response;
+                var env_spec_input = document.getElementById("new_textarea").value;
+                const myRequest = new Request('/api/render/', {
+                    method: 'POST', 
+                    body: env_spec_input});
+
+                fetch(myRequest).then(response => response.text())
+                .then(responseText => html_response = responseText)
+                .then(responseText => console.log(responseText))
+                .then(responseText => document.getElementById('pre_element').textContent = html_response)
+                .then(responseText => document.getElementById('div_element').innerHTML = html_response);
+            }
+        </script>
+    </body>
+</html>

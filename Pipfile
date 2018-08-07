@@ -8,6 +8,8 @@ name = "pypi"
 [dev-packages]
 pytest = "*"
 black = "==18.06b"
+env-spec = {editable = true, path = "."}
+flask = "*"
 
 [requires]
 python_version = "3.7"
