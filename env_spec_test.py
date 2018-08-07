@@ -59,10 +59,13 @@ def test_default_values():
     ) == (
         '<label for="env_spec_debug">DEBUG</label>\n'
         '<select id="env_spec_debug" name="debug">\n'
-        '\t<option value="1">1</option>\n'
+        '\t<option value="0">0</option>\n'
+        '\t<option value="1"selected>1</option>\n'
         "</select>\n"
         '<label for="env_spec_environment">ENVIRONMENT</label>\n'
         '<select id="env_spec_environment" name="environment">\n'
-        '\t<option value="development">development</option>\n'
+        '\t<option value="production">production</option>\n'
+        '\t<option value="staging">staging</option>\n'
+        '\t<option value="development"selected>development</option>\n'
         "</select>\n"
     )

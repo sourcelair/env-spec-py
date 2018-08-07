@@ -8,6 +8,7 @@ name = "pypi"
 [dev-packages]
 pytest = "*"
 black = "==18.06b"
+env-spec = {editable = true, path = "."}
 
 [requires]
 python_version = "3.7"
