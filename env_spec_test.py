@@ -26,7 +26,7 @@ def test_valid_input_types():
     )
 
 
-def test_valid_input_restricted_choices():
+def test_restricted_choices():
     assert env_spec.render_env_spec_to_html(
         "DEBUG: [0,1]\nENVIRONMENT: [production,staging,development]"
     ) == (
@@ -40,5 +40,32 @@ def test_valid_input_restricted_choices():
         '\t<option value="production">production</option>\n'
         '\t<option value="staging">staging</option>\n'
         '\t<option value="development">development</option>\n'
+        "</select>\n"
+    )
+
+
+def test_wrong_default_values():
+    assert (
+        env_spec.render_env_spec_to_html(
+            "DEBUG: [0,1]=1\nENVIRONMENT: [production,staging,development]=develoent"
+        )
+        == ""
+    )
+
+
+def test_default_values():
+    assert env_spec.render_env_spec_to_html(
+        "DEBUG: [0,1]= 1\nENVIRONMENT: [production,staging,development]= development"
+    ) == (
+        '<label for="env_spec_debug">DEBUG</label>\n'
+        '<select id="env_spec_debug" name="debug">\n'
+        '\t<option value="0">0</option>\n'
+        '\t<option value="1"selected>1</option>\n'
+        "</select>\n"
+        '<label for="env_spec_environment">ENVIRONMENT</label>\n'
+        '<select id="env_spec_environment" name="environment">\n'
+        '\t<option value="production">production</option>\n'
+        '\t<option value="staging">staging</option>\n'
+        '\t<option value="development"selected>development</option>\n'
         "</select>\n"
     )
