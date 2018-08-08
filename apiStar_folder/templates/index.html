@@ -1,0 +1,17 @@
+<html>
+    <body>
+        <h2>Textarea for user's input</h2>
+        <p>Type input in env.spec format.</p>
+        <form action="/action_page.php">
+            <textarea name="message" rows="10" cols="30"></textarea>
+            <input type="submit">
+        </form>
+        <script>
+            function myFunction() {
+                var x = document.getElementById("myTextarea").value;
+                document.getElementById("demo").innerHTML = x;
+            }
+        </script>
+    </body>
+
+</html>
