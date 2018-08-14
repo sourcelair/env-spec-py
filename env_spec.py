@@ -18,14 +18,15 @@ valid_types_list = [
 
 def create_list(input_str):
     """
-    Creates a list from input_str_list.Returns the new list. If input_str=[1,2,], returns empty string(syntax error).
+    Creates a list from input_str_list.Returns the new list.
+    If input_str=[1,2,], returns empty list(syntax error).
     """
     input_str = input_str.replace("[", "")
     input_str = input_str.replace("]", "")
     new_list = input_str.split(",")
 
     if "" in new_list:
-        return ""
+        return []
 
     for pos in range(0, len(new_list)):
         new_list[pos] = str(new_list[pos])
@@ -50,8 +51,10 @@ def check_input(input_field):
 
 def check_type(input_type):
     """
-   Checks input type (valid type, valid with default value, restricted choice, restricted choice with default value, comment) for syntax errors. Returs True if syntax is correct, else returns False.
-    """
+   Checks input type (valid type, valid with default value, restricted choice,
+   restricted choice with default value, comment) for syntax errors.
+   Returs True if syntax is correct, else returns False.
+   """
     if "[" in input_type and "=" in input_type:
         if "#" in input_type:
             env_var_type, rest = input_type.split("=")
@@ -102,14 +105,18 @@ def render_env_var_spec(env_var_field, env_var_type):
     Creates html string from env_variables (field, type). If env_var_type is a restricted choice,
     calls create_list to create the list of strs from env_var_type string. Returns the string.
     """
-    comment = ""
+    comment_regex = r"^(.+)\#(.+)$"
+    comment = None
 
-    if "#" in env_var_type:
-        env_var_type, comment = env_var_type.split("#")
-        env_var_type = env_var_type.strip()
+    comment_match = re.match(comment_regex, env_var_type)
+
+    if comment_match:
+        env_var_type = comment_match.groups()[0]
+        comment = comment_match.groups()[1]
+    else:
+        env_var_type = env_var_type or "text"
 
     env_var_field_lower = env_var_field.lower()
-    env_var_type = env_var_type or "text"
 
     if "[" not in env_var_type:
         if "=" in env_var_type:
@@ -125,7 +132,7 @@ def render_env_var_spec(env_var_field, env_var_type):
                 f'<label for="env_spec_{env_var_field_lower}">{env_var_field}</label>\n'
                 f'<input id="env_spec_{env_var_field_lower}" name="{env_var_field_lower}" type="{env_var_type}" />\n'
             )
-            if comment != "":
+            if comment != None:
                 ret_str += f"<small>{comment}</small>\n"
     else:
         ret_str = ""
@@ -152,14 +159,15 @@ def render_env_var_spec(env_var_field, env_var_type):
 
         ret_str += "</select>\n"
 
-        if comment != "":
+        if comment != None:
             ret_str += f"<small>{comment}</small>\n"
     return ret_str
 
 
 def render_env_spec_to_html(input_str):
     """
-    Takes the whole string and splits it first by \n and then by :, if possible. Returns html output or "".
+    Takes the whole string and splits it first by \n and then by :,
+    if possible. Returns html output or "".
     """
     html_output = ""
 
@@ -197,5 +205,5 @@ def main():
 
 
 if __name__ == "__main__":
-    spec_str = "  # This email will\nADMIN_EMAIL: email\n# This email will\nDEBUG: number\nADMIN_NAME"
+    spec_str = "# This line will be ignored\nADMIN_EMAIL: email  # This email will be notified for occurring errors"
     print(main())
