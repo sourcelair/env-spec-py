@@ -91,3 +91,13 @@ def test_comments_syntax():
         '\t<option value="development"selected>development</option>\n'
         "</select>\n"
     )
+
+
+def test_ignore_comments():
+    assert env_spec.render_env_spec_to_html(
+        "# This line will be ignored\nADMIN_EMAIL: email  # This email will be notified for occurring errors"
+    ) == (
+        '<label for="env_spec_admin_email">ADMIN_EMAIL</label>\n'
+        '<input id="env_spec_admin_email" name="admin_email" type="email" />\n'
+        "<small> This email will be notified for occurring errors</small>\n"
+    )

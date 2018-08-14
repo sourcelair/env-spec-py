@@ -178,6 +178,10 @@ def render_env_spec_to_html(input_str):
                 return ""
         except:
             input_field = line
+            input_field = input_field.strip()
+
+            if input_field[0] == "#":
+                continue
 
             if check_input(input_field):
                 html_output += render_env_var_spec(input_field, "")
@@ -193,5 +197,5 @@ def main():
 
 
 if __name__ == "__main__":
-    spec_str = "DEBUG: number = 3 # This email will \nENVIRONMENT: [production,staging, development]# This email will be notified for occurring errors "
+    spec_str = "  # This email will\nADMIN_EMAIL: email\n# This email will\nDEBUG: number\nADMIN_NAME"
     print(main())
