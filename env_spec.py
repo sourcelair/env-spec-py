@@ -39,36 +39,46 @@ def create_list(input_str):
     return new_list
 
 
+def render_label(env_spec_entry):
+    label_str = f'<label for="env_spec_{env_spec_entry["name"].lower()}">{env_spec_entry["name"]}</label>\n'
+
+    return label_str
+
+
+def render_input(env_spec_entry):
+    if env_spec_entry["default_value"] is None:
+        input_str = f'<input id="env_spec_{env_spec_entry["name"].lower()}" name="{env_spec_entry["name"].lower()}" type="{env_spec_entry["type"]}" />\n'
+    else:
+        input_str = f'<input id="env_spec_{env_spec_entry["name"].lower()}" name="{env_spec_entry["name"].lower()}" type="{env_spec_entry["type"]}" value="{env_spec_entry["default_value"]}" />\n'
+
+    return input_str
+
+
+def render_choice(choice, selected=False):
+    if selected is False:
+        choice_str = f'\t<option value="{choice}">{choice}</option>\n'
+    else:
+        choice_str = f'\t<option value="{choice}"selected>{choice}</option>\n'
+    return choice_str
+
+
 def render_to_html(env_spec_list):
     html_output = ""
 
-    for dict in env_spec_list:
-        if dict["choices"] is None:
-            if dict["default_value"] is None:
-                ret_str = (
-                    f'<label for="env_spec_{dict["name"].lower()}">{dict["name"]}</label>\n'
-                    f'<input id="env_spec_{dict["name"].lower()}" name="{dict["name"].lower()}" type="{dict["type"]}" />\n'
-                )
-            elif dict["default_value"] is not None:
-                ret_str = (
-                    f'<label for="env_spec_{dict["name"].lower()}">{dict["name"]}</label>\n'
-                    f'<input id="env_spec_{dict["name"].lower()}" name="{dict["name"].lower()}" type="{dict["type"]}" value="{dict["default_value"]}" />\n'
-                )
-        elif dict["choices"] is not None:
-            ret_str = (
-                f'<label for="env_spec_{dict["name"].lower()}">{dict["name"]}</label>\n'
-                f'<select id="env_spec_{dict["name"].lower()}" name="{dict["name"].lower()}">\n'
-            )
+    for env_spec_entry in env_spec_list:
+        if env_spec_entry["choices"] is None:
+            ret_str = render_label(env_spec_entry)
+            ret_str += render_input(env_spec_entry)
+        else:
+            ret_str = render_label(env_spec_entry)
+            ret_str += f'<select id="env_spec_{env_spec_entry["name"].lower()}" name="{env_spec_entry["name"].lower()}">\n'
 
-            for x in range(0, len(dict["choices"])):
-                if (
-                    dict["default_value"] is not None
-                    and dict["default_value"] == dict["choices"][x]
-                ):
-                    ret_str += f'\t<option value="{dict["choices"][x]}"selected>{dict["choices"][x]}</option>\n'
-                else:
-                    ret_str += f'\t<option value="{dict["choices"][x]}">{dict["choices"][x]}</option>\n'
+            for choice in env_spec_entry["choices"]:
+                ret_str += render_choice(
+                    choice, choice == env_spec_entry["default_value"]
+                )
             ret_str += "</select>\n"
+
         html_output += ret_str
     return html_output
 
