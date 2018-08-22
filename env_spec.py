@@ -63,6 +63,8 @@ def render_choice(choice, selected=False):
 
 
 def render_to_html(env_spec_list):
+    if not env_spec_list:
+        return []
     html_output = ""
 
     for env_spec_entry in env_spec_list:
@@ -97,7 +99,6 @@ def parse(env_spec_text):
         line_dict = {}
 
         name_match = re.match(name_regex, line)
-        default_value_match = re.match(default_values_regex, line)
 
         if name_match:
             name = name_match.groups()[0]
@@ -114,11 +115,13 @@ def parse(env_spec_text):
             line_dict["name"] = name
 
             choices_match = re.match(choices_regex, line)
+            default_value_match = re.match(default_values_regex, line)
 
             if choices_match:
                 choices_str = choices_match.groups()[0]
 
                 choices = create_list(choices_str)
+
                 if not choices:
                     try:
                         raise EnvSpecSyntaxError
@@ -157,8 +160,7 @@ def parse(env_spec_text):
                         return []
                 line_dict["type"] = type_t
             else:
-                type_t = "text"
-                line_dict["type"] = type_t
+                line_dict["type"] = "text"
         else:
             name = line.strip()
             ret = re.match(alphanumeric_that_does_not_start_with_digit, name)
@@ -168,9 +170,9 @@ def parse(env_spec_text):
                     raise EnvSpecSyntaxError
                 except EnvSpecSyntaxError:
                     return []
-            type_t = "text"
+
             line_dict["name"] = name
-            line_dict["type"] = type_t
+            line_dict["type"] = "text"
             line_dict["choices"] = None
             line_dict["default_value"] = None
 
@@ -179,13 +181,20 @@ def parse(env_spec_text):
     return env_spec_list
 
 
-def main():
+def render_env_spec(spec_str):
     env_spec_list = parse(spec_str)
-    # print(env_spec_list)
+    print(env_spec_list)
     html_output = render_to_html(env_spec_list)
     return html_output
 
 
+def main():
+    html_output = render_env_spec(spec_str)
+    return html_output
+
+
 if __name__ == "__main__":
-    spec_str = "ADMIN_EMAIL: email\nDEBUG: number\nADMIN_NAME"
+    spec_str = (
+        "DEBUG: [0,1]= 1\nENVIRONMENT: [production,staging,development]= development"
+    )
     print(main())
