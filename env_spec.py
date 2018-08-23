@@ -2,6 +2,10 @@ import re
 
 
 class EnvSpecSyntaxError(Exception):
+    """
+    Excpetion used for syntax errors.
+    """
+
     pass
 
 
@@ -40,12 +44,18 @@ def create_list(input_str):
 
 
 def render_label(env_spec_entry):
+    """
+    Creates the html output for label.Takes as argument the current dictionary.
+    """
     label_str = f'<label for="env_spec_{env_spec_entry["name"].lower()}">{env_spec_entry["name"]}</label>\n'
 
     return label_str
 
 
 def render_input(env_spec_entry):
+    """
+    Creates the html output for input.Takes as argument the current dictionary.
+    """
     if env_spec_entry["default_value"] is None:
         input_str = f'<input id="env_spec_{env_spec_entry["name"].lower()}" name="{env_spec_entry["name"].lower()}" type="{env_spec_entry["type"]}" />\n'
     else:
@@ -55,6 +65,9 @@ def render_input(env_spec_entry):
 
 
 def render_choice(choice, selected=False):
+    """
+    Creates the html output for key "choice".
+    """
     if selected is False:
         choice_str = f'\t<option value="{choice}">{choice}</option>\n'
     else:
@@ -63,6 +76,11 @@ def render_choice(choice, selected=False):
 
 
 def render_to_html(env_spec_list):
+    """
+    Creates the html output from the env_spec list, by checking whether the
+    value is None or not.(comments, choices, default_value)
+    Returns the html output of the whole list.
+    """
     if not env_spec_list:
         return []
     html_output = ""
@@ -81,22 +99,46 @@ def render_to_html(env_spec_list):
                 )
             ret_str += "</select>\n"
 
+        if env_spec_entry["comment"] is not None:
+            ret_str += f"<small>{env_spec_entry['comment']}</small>\n"
+
         html_output += ret_str
     return html_output
 
 
 def parse(env_spec_text):
+    """
+    Parse function creates a list of dictionaries by splitting env_spec_text by
+    \n. Every line will be a dictionary.The keys of dictionary are:
+    name, type, choices, default_value, comment.
+    Returns the env_spec listm or empty list [], for exception.
+    """
     env_spec_list = []
 
     alphanumeric_that_does_not_start_with_digit = r"^[A-Z_][0-9A-Z_]*$"
     name_regex = r"^(.+)\:(.+)$"
     choices_regex = r"^(.+)\]"
     default_values_regex = r"^(.+)\=(.+)$"
+    line_comment_regex = r"^#"
+    comment_regex = r"^(.+)\#(.+)$"
 
     lines = env_spec_text.split("\n")
 
     for line in lines:
         line_dict = {}
+
+        line_comment_match = re.match(line_comment_regex, line)
+
+        if line_comment_match:
+            continue
+        comment_match = re.match(comment_regex, line)
+
+        if comment_match:
+            line = comment_match.groups()[0]
+            comment = comment_match.groups()[1]
+            line_dict["comment"] = comment
+        else:
+            line_dict["comment"] = None
 
         name_match = re.match(name_regex, line)
 
@@ -182,8 +224,11 @@ def parse(env_spec_text):
 
 
 def render_env_spec(spec_str):
+    """
+    Render_emv_spec function takes the given spec_str
+    and returns the html output.
+    """
     env_spec_list = parse(spec_str)
-    print(env_spec_list)
     html_output = render_to_html(env_spec_list)
     return html_output
 
@@ -194,7 +239,5 @@ def main():
 
 
 if __name__ == "__main__":
-    spec_str = (
-        "DEBUG: [0,1]= 1\nENVIRONMENT: [production,staging,development]= development"
-    )
+    spec_str = "# This line will be ignored\nADMIN_EMAIL: email  # This email will be notified for occurring errors"
     print(main())
