@@ -54,7 +54,7 @@ def render_label(env_spec_entry):
 
 def render_input(env_spec_entry):
     """
-    Creates the html output for input.Takes as argument the current dictionary.
+    Creates the html output for env_spec_entry input, which is the current dictionary.
     """
     if env_spec_entry["default_value"] is None:
         input_str = f'<input id="env_spec_{env_spec_entry["name"].lower()}" name="{env_spec_entry["name"].lower()}" type="{env_spec_entry["type"]}" />\n'
@@ -68,11 +68,9 @@ def render_choice(choice, selected=False):
     """
     Creates the html output for key "choice".
     """
-    if selected is False:
-        choice_str = f'\t<option value="{choice}">{choice}</option>\n'
-    else:
-        choice_str = f'\t<option value="{choice}"selected>{choice}</option>\n'
-    return choice_str
+    selected_state = "selected" if selected else ""
+
+    return f'\t<option value="{choice}"{selected_state}>{choice}</option>\n'
 
 
 def render_to_html(env_spec_list):
@@ -125,20 +123,20 @@ def parse(env_spec_text):
     lines = env_spec_text.split("\n")
 
     for line in lines:
-        line_dict = {}
+        env_spec_entry = {}
 
         line_comment_match = re.match(line_comment_regex, line)
 
         if line_comment_match:
             continue
+
+        env_spec_entry["comment"] = None
         comment_match = re.match(comment_regex, line)
 
         if comment_match:
             line = comment_match.groups()[0]
             comment = comment_match.groups()[1]
-            line_dict["comment"] = comment
-        else:
-            line_dict["comment"] = None
+            env_spec_entry["comment"] = comment
 
         name_match = re.match(name_regex, line)
 
@@ -146,15 +144,16 @@ def parse(env_spec_text):
             name = name_match.groups()[0]
             line = name_match.groups()[1]
 
-            ret = re.match(alphanumeric_that_does_not_start_with_digit, name)
+            is_variable_name_valid = re.match(
+                alphanumeric_that_does_not_start_with_digit, name
+            )
 
-            if ret is None:
-                try:
-                    raise EnvSpecSyntaxError
-                except EnvSpecSyntaxError:
-                    return []
+            if not is_variable_name_valid:
+                raise EnvSpecSyntaxError("SYNTAX ERROR: Invalid variable name.")
 
-            line_dict["name"] = name
+            env_spec_entry["name"] = name
+            env_spec_entry["choices"] = None
+            env_spec_entry["default_value"] = None
 
             choices_match = re.match(choices_regex, line)
             default_value_match = re.match(default_values_regex, line)
@@ -165,13 +164,9 @@ def parse(env_spec_text):
                 choices = create_list(choices_str)
 
                 if not choices:
-                    try:
-                        raise EnvSpecSyntaxError
-                    except EnvSpecSyntaxError:
-                        return []
-                line_dict["choices"] = choices
-            else:
-                line_dict["choices"] = None
+                    raise EnvSpecSyntaxError("SYNTAX ERROR: Invalid choices list.")
+
+                env_spec_entry["choices"] = choices
 
             if default_value_match:
                 default_value = default_value_match.groups()[1]
@@ -179,46 +174,39 @@ def parse(env_spec_text):
 
                 if choices_match:
                     if default_value not in choices or default_value == "":
-                        try:
-                            raise EnvSpecSyntaxError
-                        except EnvSpecSyntaxError:
-                            return []
-                line_dict["default_value"] = default_value
-            else:
-                line_dict["default_value"] = None
+                        raise EnvSpecSyntaxError("SYNTAX ERROR: Invalid default value.")
+
+                env_spec_entry["default_value"] = default_value
 
             if not choices_match:
                 if default_value_match:
-                    type_t = default_value_match.groups()[0]
+                    env_spec_type = default_value_match.groups()[0]
                 else:
-                    type_t = line
+                    env_spec_type = line
 
-                type_t = type_t.strip()
+                env_spec_type = env_spec_type.strip()
 
-                if type_t not in valid_types_list:
-                    try:
-                        raise EnvSpecSyntaxError
-                    except EnvSpecSyntaxError:
-                        return []
-                line_dict["type"] = type_t
+                if env_spec_type not in valid_types_list:
+                    raise EnvSpecSyntaxError("SYNTAX ERROR: Invalid type.")
+
+                env_spec_entry["type"] = env_spec_type
             else:
-                line_dict["type"] = "text"
+                env_spec_entry["type"] = "text"
         else:
             name = line.strip()
-            ret = re.match(alphanumeric_that_does_not_start_with_digit, name)
+            is_variable_name_valid = re.match(
+                alphanumeric_that_does_not_start_with_digit, name
+            )
 
-            if ret is None:
-                try:
-                    raise EnvSpecSyntaxError
-                except EnvSpecSyntaxError:
-                    return []
+            if not is_variable_name_valid:
+                raise EnvSpecSyntaxError("SYNTAX ERROR: Invalid variable name.")
 
-            line_dict["name"] = name
-            line_dict["type"] = "text"
-            line_dict["choices"] = None
-            line_dict["default_value"] = None
+            env_spec_entry["name"] = name
+            env_spec_entry["type"] = "text"
+            env_spec_entry["choices"] = None
+            env_spec_entry["default_value"] = None
 
-        env_spec_list.append(line_dict)
+        env_spec_list.append(env_spec_entry)
 
     return env_spec_list
 
@@ -239,5 +227,5 @@ def main():
 
 
 if __name__ == "__main__":
-    spec_str = "# This line will be ignored\nADMIN_EMAIL: email  # This email will be notified for occurring errors"
+    spec_str = "DATABASE_URL: testing"
     print(main())

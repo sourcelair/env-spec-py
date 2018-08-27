@@ -1,16 +1,23 @@
 import env_spec
+import pytest
 
 
 def test_invalid_input_non_latin():
-    assert env_spec.parse("dαtabase_url") == []
+    with pytest.raises(env_spec.EnvSpecSyntaxError) as excinfo:
+        env_spec.parse("dαtabase_url")
+    assert "SYNTAX ERROR: Invalid variable name." in str(excinfo.value)
 
 
 def test_invalid_input_start_with_digit():
-    assert env_spec.parse("1DATABASE_URL: url") == []
+    with pytest.raises(env_spec.EnvSpecSyntaxError) as excinfo:
+        env_spec.parse("1DATABASE_URL: url")
+    assert "SYNTAX ERROR: Invalid variable name." in str(excinfo.value)
 
 
 def test_non_existed_type():
-    assert env_spec.parse("DATABASE_URL: testing") == []
+    with pytest.raises(env_spec.EnvSpecSyntaxError) as excinfo:
+        env_spec.parse("DATABASE_URL: testing")
+    assert "SYNTAX ERROR: Invalid type." in str(excinfo.value)
 
 
 def test_valid_input_types():
@@ -45,12 +52,11 @@ def test_restricted_choices():
 
 
 def test_wrong_default_values():
-    assert (
-        env_spec.render_env_spec(
+    with pytest.raises(env_spec.EnvSpecSyntaxError) as excinfo:
+        env_spec.parse(
             "DEBUG: [0,1]=1\nENVIRONMENT: [production,staging,development]=develoent"
         )
-        == []
-    )
+    assert "SYNTAX ERROR: Invalid default value." in str(excinfo.value)
 
 
 def test_default_values():
