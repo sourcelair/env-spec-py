@@ -6,7 +6,9 @@ class EnvSpecSyntaxError(Exception):
     Excpetion used for syntax errors.
     """
 
-    pass
+    def __init__(self, message, line):
+        super().__init__(message)
+        self.line = line
 
 
 valid_types_list = [
@@ -124,35 +126,40 @@ def parse(env_spec_text):
     comment_regex = r"^(.+)\#(.+)$"
 
     lines = env_spec_text.split("\n")
+    enumerated_list = list(enumerate(lines))
 
-    for line in lines:
+    for line in enumerated_list:
+        line_number = line[0]
+        env_spec_line = line[1]
         env_spec_entry = {}
 
-        line_comment_match = re.match(line_comment_regex, line)
+        line_comment_match = re.match(line_comment_regex, env_spec_line)
 
         if line_comment_match:
             continue
 
         env_spec_entry["comment"] = None
-        comment_match = re.match(comment_regex, line)
+        comment_match = re.match(comment_regex, env_spec_line)
 
         if comment_match:
-            line = comment_match.groups()[0]
+            env_spec_line = comment_match.groups()[0]
             comment = comment_match.groups()[1]
             env_spec_entry["comment"] = comment
 
-        name_match = re.match(name_regex, line)
+        name_match = re.match(name_regex, env_spec_line)
 
         if name_match:
             name = name_match.groups()[0]
-            line = name_match.groups()[1]
+            env_spec_line = name_match.groups()[1]
 
             is_variable_name_valid = re.match(
                 alphanumeric_that_does_not_start_with_digit, name
             )
 
             if not is_variable_name_valid:
-                raise EnvSpecSyntaxError("SYNTAX ERROR: Invalid variable name.")
+                raise EnvSpecSyntaxError(
+                    "SYNTAX ERROR: Invalid variable name.", line_number
+                )
 
             env_spec_entry["name"] = name
             env_spec_entry["choices"] = None
@@ -167,7 +174,9 @@ def parse(env_spec_text):
                 choices = create_list(choices_str)
 
                 if not choices:
-                    raise EnvSpecSyntaxError("SYNTAX ERROR: Invalid choices list.")
+                    raise EnvSpecSyntaxError(
+                        "SYNTAX ERROR: Invalid choices list.", line_number
+                    )
 
                 env_spec_entry["choices"] = choices
 
@@ -177,7 +186,9 @@ def parse(env_spec_text):
 
                 if choices_match:
                     if default_value not in choices or default_value == "":
-                        raise EnvSpecSyntaxError("SYNTAX ERROR: Invalid default value.")
+                        raise EnvSpecSyntaxError(
+                            "SYNTAX ERROR: Invalid default value.", line_number
+                        )
 
                 env_spec_entry["default_value"] = default_value
 
@@ -185,24 +196,24 @@ def parse(env_spec_text):
                 if default_value_match:
                     env_spec_type = default_value_match.groups()[0]
                 else:
-                    env_spec_type = line
+                    env_spec_type = env_spec_line
 
                 env_spec_type = env_spec_type.strip()
 
                 if env_spec_type not in valid_types_list:
-                    raise EnvSpecSyntaxError("SYNTAX ERROR: Invalid type.")
+                    raise EnvSpecSyntaxError("SYNTAX ERROR: Invalid type.", line_number)
 
                 env_spec_entry["type"] = env_spec_type
             else:
                 env_spec_entry["type"] = "text"
         else:
-            name = line.strip()
+            name = env_spec_line.strip()
             is_variable_name_valid = re.match(
                 alphanumeric_that_does_not_start_with_digit, name
             )
 
             if not is_variable_name_valid:
-                raise EnvSpecSyntaxError("SYNTAX ERROR: Invalid variable name.")
+                raise EnvSpecSyntaxError("SYNTAX ERROR: Invalid variable name.", line_number)
 
             env_spec_entry["name"] = name
             env_spec_entry["type"] = "text"
@@ -230,5 +241,7 @@ def main():
 
 
 if __name__ == "__main__":
-    spec_str = "# This line will be ignored\nADMIN_EMAIL: email  # This email will be notified for occurring errors"
+    spec_str = (
+        "DEBUG: [0,1]= 1\nENVIRONMENT: [production,staging,development]= development"
+    )
     print(main())
