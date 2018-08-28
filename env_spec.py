@@ -56,12 +56,15 @@ def render_input(env_spec_entry):
     """
     Creates the html output for env_spec_entry input, which is the current dictionary.
     """
-    if env_spec_entry["default_value"] is None:
-        input_str = f'<input id="env_spec_{env_spec_entry["name"].lower()}" name="{env_spec_entry["name"].lower()}" type="{env_spec_entry["type"]}" />\n'
-    else:
-        input_str = f'<input id="env_spec_{env_spec_entry["name"].lower()}" name="{env_spec_entry["name"].lower()}" type="{env_spec_entry["type"]}" value="{env_spec_entry["default_value"]}" />\n'
+    default_value = env_spec_entry["default_value"]
+    default_value_state = f'value="{default_value}"' if default_value else ""
 
-    return input_str
+    env_spec_entry_input = (
+        f'<input id="env_spec_{env_spec_entry["name"].lower()}" '
+        f'name="{env_spec_entry["name"].lower()}" type="{env_spec_entry["type"]}" '
+        f'{default_value_state}" />\n'
+    )
+    return env_spec_entry_input
 
 
 def render_choice(choice, selected=False):
@@ -227,5 +230,5 @@ def main():
 
 
 if __name__ == "__main__":
-    spec_str = "DATABASE_URL: testing"
+    spec_str = "# This line will be ignored\nADMIN_EMAIL: email  # This email will be notified for occurring errors"
     print(main())
