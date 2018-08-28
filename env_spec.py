@@ -1,5 +1,14 @@
 import re
 
+
+class EnvSpecSyntaxError(Exception):
+    """
+    Excpetion used for syntax errors.
+    """
+
+    pass
+
+
 valid_types_list = [
     "color",
     "date",
@@ -19,138 +28,207 @@ valid_types_list = [
 def create_list(input_str):
     """
     Creates a list from input_str_list.Returns the new list.
+    If input_str=[1,2,], returns empty list(syntax error).
     """
     input_str = input_str.replace("[", "")
     input_str = input_str.replace("]", "")
     new_list = input_str.split(",")
 
+    if "" in new_list:
+        return []
+
     for pos in range(0, len(new_list)):
-        new_list[pos] = str(new_list[pos])
+        new_list[pos] = str(new_list[pos]).strip()
 
     return new_list
 
 
-def check_input(input_field):
+def render_label(env_spec_entry):
     """
-    Checks syntax of input field(uppercase latin chars,numeric digits, underscores).
-    Returns False for error or True for correct syntax.
+    Creates the html output for label.Takes as argument the current dictionary.
     """
-    alphanumeric_that_does_not_start_with_digit = r"^[A-Z_][0-9A-Z_]*$"
+    label_str = f'<label for="env_spec_{env_spec_entry["name"].lower()}">{env_spec_entry["name"]}</label>\n'
 
-    ret = re.match(alphanumeric_that_does_not_start_with_digit, input_field)
-
-    if ret is None:
-        return False
-
-    return True
+    return label_str
 
 
-def check_type(input_type):
+def render_input(env_spec_entry):
     """
-    Checks if given type is valid and returns True, else returns False.
+    Creates the html output for env_spec_entry input, which is the current dictionary.
     """
+    default_value = env_spec_entry["default_value"]
+    default_value_state = f'value="{default_value}"' if default_value else ""
 
-    if "[" in input_type and "=" in input_type:
-        env_var_type, value = input_type.split("=")
-        value = value.strip()
-
-        if value in env_var_type:
-            return True
-        else:
-            return False
-    if "=" in input_type:
-        return True
-
-    if "[" in input_type:
-        return True
-    elif input_type not in valid_types_list:
-        return False
-    else:
-        return True
+    env_spec_entry_input = (
+        f'<input id="env_spec_{env_spec_entry["name"].lower()}" '
+        f'name="{env_spec_entry["name"].lower()}" type="{env_spec_entry["type"]}" '
+        f'{default_value_state}" />\n'
+    )
+    return env_spec_entry_input
 
 
-def render_env_var_spec(env_var_field, env_var_type):
+def render_choice(choice, selected=False):
     """
-    Creates html string from env_variables (field, type). If env_var_type is a restricted choice,
-    calls create_list to create the list of strs from env_var_type string. Returns the string.
+    Creates the html output for key "choice".
     """
+    selected_state = "selected" if selected else ""
 
-    env_var_field_lower = env_var_field.lower()
-    env_var_type = env_var_type or "text"
-
-    if "[" not in env_var_type:
-        if "=" in env_var_type:
-            env_var_type, value = env_var_type.split("=")
-            value = value.strip()
-
-            ret_str = (
-                f'<label for="env_spec_{env_var_field_lower}">{env_var_field}</label>\n'
-                f'<input id="env_spec_{env_var_field_lower}" name="{env_var_field_lower}" type="{env_var_type}" value="{value}" />\n'
-            )
-        else:
-            ret_str = (
-                f'<label for="env_spec_{env_var_field_lower}">{env_var_field}</label>\n'
-                f'<input id="env_spec_{env_var_field_lower}" name="{env_var_field_lower}" type="{env_var_type}" />\n'
-            )
-    else:
-        ret_str = ""
-        try:
-            restr_choices, value = env_var_type.split("=")
-            value = value.strip()
-            env_var_type_list = create_list(restr_choices)
-        except:
-            env_var_type_list = create_list(env_var_type)
-
-        ret_str += (
-            f'<label for="env_spec_{env_var_field_lower}">{env_var_field}</label>\n'
-            f'<select id="env_spec_{env_var_field_lower}" name="{env_var_field_lower}">\n'
-        )
-
-        for line in env_var_type_list:
-            if "=" in env_var_type and value == line:
-                ret_str += f'\t<option value="{line}"selected>{line}</option>\n'
-            else:
-                ret_str += f'\t<option value="{line}">{line}</option>\n'
-
-        ret_str += "</select>\n"
-
-    return ret_str
+    return f'\t<option value="{choice}"{selected_state}>{choice}</option>\n'
 
 
-def render_env_spec_to_html(input_str):
+def render_to_html(env_spec_list):
     """
-    Takes the whole string and splits it first by \n and then by :, if possible. Returns html output or "".
+    Creates the html output from the env_spec list, by checking whether the
+    value is None or not.(comments, choices, default_value)
+    Returns the html output of the whole list.
     """
+    if not env_spec_list:
+        return []
     html_output = ""
 
-    lines = input_str.split("\n")
+    for env_spec_entry in env_spec_list:
+        if env_spec_entry["choices"] is None:
+            ret_str = render_label(env_spec_entry)
+            ret_str += render_input(env_spec_entry)
+        else:
+            ret_str = render_label(env_spec_entry)
+            ret_str += f'<select id="env_spec_{env_spec_entry["name"].lower()}" name="{env_spec_entry["name"].lower()}">\n'
+
+            for choice in env_spec_entry["choices"]:
+                ret_str += render_choice(
+                    choice, choice == env_spec_entry["default_value"]
+                )
+            ret_str += "</select>\n"
+
+        if env_spec_entry["comment"] is not None:
+            ret_str += f"<small>{env_spec_entry['comment']}</small>\n"
+
+        html_output += ret_str
+    return html_output
+
+
+def parse(env_spec_text):
+    """
+    Parse function creates a list of dictionaries by splitting env_spec_text by
+    \n. Every line will be a dictionary.The keys of dictionary are:
+    name, type, choices, default_value, comment.
+    Returns the env_spec listm or empty list [], for exception.
+    """
+    env_spec_list = []
+
+    alphanumeric_that_does_not_start_with_digit = r"^[A-Z_][0-9A-Z_]*$"
+    name_regex = r"^(.+)\:(.+)$"
+    choices_regex = r"^(.+)\]"
+    default_values_regex = r"^(.+)\=(.+)$"
+    line_comment_regex = r"^#"
+    comment_regex = r"^(.+)\#(.+)$"
+
+    lines = env_spec_text.split("\n")
 
     for line in lines:
-        try:
-            input_field, input_type = line.split(": ")
+        env_spec_entry = {}
 
-            if check_input(input_field) and check_type(input_type):
-                html_output += render_env_var_spec(input_field, input_type)
+        line_comment_match = re.match(line_comment_regex, line)
+
+        if line_comment_match:
+            continue
+
+        env_spec_entry["comment"] = None
+        comment_match = re.match(comment_regex, line)
+
+        if comment_match:
+            line = comment_match.groups()[0]
+            comment = comment_match.groups()[1]
+            env_spec_entry["comment"] = comment
+
+        name_match = re.match(name_regex, line)
+
+        if name_match:
+            name = name_match.groups()[0]
+            line = name_match.groups()[1]
+
+            is_variable_name_valid = re.match(
+                alphanumeric_that_does_not_start_with_digit, name
+            )
+
+            if not is_variable_name_valid:
+                raise EnvSpecSyntaxError("SYNTAX ERROR: Invalid variable name.")
+
+            env_spec_entry["name"] = name
+            env_spec_entry["choices"] = None
+            env_spec_entry["default_value"] = None
+
+            choices_match = re.match(choices_regex, line)
+            default_value_match = re.match(default_values_regex, line)
+
+            if choices_match:
+                choices_str = choices_match.groups()[0]
+
+                choices = create_list(choices_str)
+
+                if not choices:
+                    raise EnvSpecSyntaxError("SYNTAX ERROR: Invalid choices list.")
+
+                env_spec_entry["choices"] = choices
+
+            if default_value_match:
+                default_value = default_value_match.groups()[1]
+                default_value = default_value.strip()
+
+                if choices_match:
+                    if default_value not in choices or default_value == "":
+                        raise EnvSpecSyntaxError("SYNTAX ERROR: Invalid default value.")
+
+                env_spec_entry["default_value"] = default_value
+
+            if not choices_match:
+                if default_value_match:
+                    env_spec_type = default_value_match.groups()[0]
+                else:
+                    env_spec_type = line
+
+                env_spec_type = env_spec_type.strip()
+
+                if env_spec_type not in valid_types_list:
+                    raise EnvSpecSyntaxError("SYNTAX ERROR: Invalid type.")
+
+                env_spec_entry["type"] = env_spec_type
             else:
-                return ""
-        except:
-            input_field = line
+                env_spec_entry["type"] = "text"
+        else:
+            name = line.strip()
+            is_variable_name_valid = re.match(
+                alphanumeric_that_does_not_start_with_digit, name
+            )
 
-            if check_input(input_field):
-                html_output += render_env_var_spec(input_field, "")
-            else:
-                return ""
+            if not is_variable_name_valid:
+                raise EnvSpecSyntaxError("SYNTAX ERROR: Invalid variable name.")
 
+            env_spec_entry["name"] = name
+            env_spec_entry["type"] = "text"
+            env_spec_entry["choices"] = None
+            env_spec_entry["default_value"] = None
+
+        env_spec_list.append(env_spec_entry)
+
+    return env_spec_list
+
+
+def render_env_spec(spec_str):
+    """
+    Render_emv_spec function takes the given spec_str
+    and returns the html output.
+    """
+    env_spec_list = parse(spec_str)
+    html_output = render_to_html(env_spec_list)
     return html_output
 
 
 def main():
-    html_output = render_env_spec_to_html(spec_str)
+    html_output = render_env_spec(spec_str)
     return html_output
 
 
 if __name__ == "__main__":
-    spec_str = (
-        "DEBUG: [0,1]= 1\nENVIRONMENT: [production,staging,development]= development"
-    )
+    spec_str = "# This line will be ignored\nADMIN_EMAIL: email  # This email will be notified for occurring errors"
     print(main())
