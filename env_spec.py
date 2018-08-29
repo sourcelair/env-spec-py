@@ -165,8 +165,8 @@ def parse(env_spec_text):
             env_spec_entry["choices"] = None
             env_spec_entry["default_value"] = None
 
-            choices_match = re.match(choices_regex, line)
-            default_value_match = re.match(default_values_regex, line)
+            choices_match = re.match(choices_regex, env_spec_line)
+            default_value_match = re.match(default_values_regex, env_spec_line)
 
             if choices_match:
                 choices_str = choices_match.groups()[0]
@@ -213,7 +213,9 @@ def parse(env_spec_text):
             )
 
             if not is_variable_name_valid:
-                raise EnvSpecSyntaxError("SYNTAX ERROR: Invalid variable name.", line_number)
+                raise EnvSpecSyntaxError(
+                    "SYNTAX ERROR: Invalid variable name.", line_number
+                )
 
             env_spec_entry["name"] = name
             env_spec_entry["type"] = "text"
@@ -241,7 +243,5 @@ def main():
 
 
 if __name__ == "__main__":
-    spec_str = (
-        "DEBUG: [0,1]= 1\nENVIRONMENT: [production,staging,development]= development"
-    )
+    spec_str = "# This line will be ignored\nADMIN_EMAIL: email  # This email will be notified for occurring errors"
     print(main())
