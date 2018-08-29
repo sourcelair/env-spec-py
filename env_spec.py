@@ -126,7 +126,8 @@ def parse(env_spec_text):
     comment_regex = r"^(.+)\#(.+)$"
 
     lines = env_spec_text.split("\n")
-    enumerated_list = list(enumerate(lines))
+    print(lines)
+    enumerated_list = enumerate(lines)
 
     for line in enumerated_list:
         line_number = line[0]
@@ -158,7 +159,8 @@ def parse(env_spec_text):
 
             if not is_variable_name_valid:
                 raise EnvSpecSyntaxError(
-                    "SYNTAX ERROR: Invalid variable name.", line_number
+                    "Invalid variable name; it should contain only latin alphanumeric characters, underscores and not start with a digit.",
+                    line_number,
                 )
 
             env_spec_entry["name"] = name
@@ -175,7 +177,7 @@ def parse(env_spec_text):
 
                 if not choices:
                     raise EnvSpecSyntaxError(
-                        "SYNTAX ERROR: Invalid choices list.", line_number
+                        "Invalid restricted choices syntax.", line_number
                     )
 
                 env_spec_entry["choices"] = choices
@@ -187,7 +189,8 @@ def parse(env_spec_text):
                 if choices_match:
                     if default_value not in choices or default_value == "":
                         raise EnvSpecSyntaxError(
-                            "SYNTAX ERROR: Invalid default value.", line_number
+                            "Invalid default value; it is not included in the provided restricted choices.",
+                            line_number,
                         )
 
                 env_spec_entry["default_value"] = default_value
@@ -201,7 +204,11 @@ def parse(env_spec_text):
                 env_spec_type = env_spec_type.strip()
 
                 if env_spec_type not in valid_types_list:
-                    raise EnvSpecSyntaxError("SYNTAX ERROR: Invalid type.", line_number)
+                    raise EnvSpecSyntaxError(
+                        "Invalid variable type; it should be one of: \n"
+                        + (", ".join(map(str, valid_types_list))),
+                        line_number,
+                    )
 
                 env_spec_entry["type"] = env_spec_type
             else:
@@ -214,7 +221,8 @@ def parse(env_spec_text):
 
             if not is_variable_name_valid:
                 raise EnvSpecSyntaxError(
-                    "SYNTAX ERROR: Invalid variable name.", line_number
+                    "Invalid variable name; it should contain only latin alphanumeric characters, underscores and not start with a digit.",
+                    line_number,
                 )
 
             env_spec_entry["name"] = name
@@ -243,5 +251,5 @@ def main():
 
 
 if __name__ == "__main__":
-    spec_str = "# This line will be ignored\nADMIN_EMAIL: email  # This email will be notified for occurring errors"
+    spec_str = "DATABASE_URL: testing"
     print(main())
